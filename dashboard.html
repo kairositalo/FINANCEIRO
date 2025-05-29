@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar/Menu -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-wallet"></i> Controle Financeiro</h2>
+            </div>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="userDisplay">Administrador</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active" data-section="dashboard-section">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </li>
+                <li data-section="transactions-section">
+                    <i class="fas fa-exchange-alt"></i> Transações
+                </li>
+                <li data-section="categories-section">
+                    <i class="fas fa-tags"></i> Categorias
+                </li>
+                <li data-section="reports-section">
+                    <i class="fas fa-chart-bar"></i> Relatórios
+                </li>
+                <li id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button id="toggleSidebar" class="toggle-sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="date-display">
+                    <i class="far fa-calendar-alt"></i>
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard-section" class="content-section active">
+                <h1>Dashboard</h1>
+                
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="card income-card">
+                        <div class="card-icon">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Receitas</h3>
+                            <p id="totalIncome">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="card expense-card">
+                        <div class="card-icon">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Despesas</h3>
+                            <p id="totalExpense">R$ 0,00</p>
+                        </div>
+                    </div>
+                    <div class="card balance-card">
+                        <div class="card-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Saldo</h3>
+                            <p id="totalBalance">R$ 0,00</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saldo Disponível Card -->
+                <div class="card available-balance-card mt-20">
+                    <div class="card-header">
+                        <h3>Saldo Disponível</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="available-balance-container">
+                            <div class="available-balance-info">
+                                <div class="available-balance-amount">
+                                    <span id="availableBalanceAmount">R$ 0,00</span>
+                                </div>
+                                <div class="available-balance-progress-container">
+                                    <div class="available-balance-progress">
+                                        <div id="availableBalanceBar" class="available-balance-bar"></div>
+                                    </div>
+                                    <div class="available-balance-labels">
+                                        <span>0%</span>
+                                        <span>50%</span>
+                                        <span>100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="available-balance-details">
+                                <div class="available-balance-detail">
+                                    <span>Receita Total:</span>
+                                    <span id="totalIncomeDetail">R$ 0,00</span>
+                                </div>
+                                <div class="available-balance-detail">
+                                    <span>Despesas Acumuladas:</span>
+                                    <span id="totalExpenseDetail">R$ 0,00</span>
+                                </div>
+                                <div class="available-balance-detail">
+                                    <span>Percentual Gasto:</span>
+                                    <span id="expensePercentage">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Despesas por Categoria</h3>
+                        <div class="chart-container">
+                            <canvas id="expensesByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Receitas vs Despesas</h3>
+                        <div class="chart-container">
+                            <canvas id="incomeVsExpenseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="recent-transactions">
+                    <div class="section-header">
+                        <h3>Transações Recentes</h3>
+                        <button id="viewAllTransactionsBtn" class="btn btn-text">Ver Todas</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="recentTransactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentTransactionsBody">
+                                <!-- Transactions will be added here dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div id="transactions-section" class="content-section">
+                <h1>Transações</h1>
+                
+                <!-- New Transaction Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Nova Transação</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="transactionForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="transactionDate">Data</label>
+                                    <input type="date" id="transactionDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transactionType">Tipo</label>
+                                    <select id="transactionType" required>
+                                        <option value="income">Receita</option>
+                                        <option value="expense">Despesa</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="transactionDescription">Descrição</label>
+                                    <input type="text" id="transactionDescription" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transactionCategory">Categoria</label>
+                                    <select id="transactionCategory" required>
+                                        <!-- Categories will be added here dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="transactionAmount">Valor (R$)</label>
+                                    <input type="number" id="transactionAmount" step="0.01" min="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="transactionPaymentMethod">Método de Pagamento</label>
+                                    <select id="transactionPaymentMethod">
+                                        <option value="money">Dinheiro</option>
+                                        <option value="debit">Cartão de Débito</option>
+                                        <option value="credit">Cartão de Crédito</option>
+                                        <option value="transfer">Transferência</option>
+                                        <option value="other">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row credit-card-details" style="display: none;">
+                                <div class="form-group">
+                                    <label for="creditCardName">Cartão</label>
+                                    <input type="text" id="creditCardName">
+                                </div>
+                                <div class="form-group">
+                                    <label for="installments">Parcelas</label>
+                                    <input type="number" id="installments" min="1" value="1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="transactionNotes">Observações</label>
+                                <textarea id="transactionNotes"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Salvar</button>
+                                <button type="reset" class="btn btn-secondary">Limpar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Transactions List -->
+                <div class="card mt-20">
+                    <div class="card-header">
+                        <h3>Todas as Transações</h3>
+                        <div class="card-actions">
+                            <button id="generatePdfBtn" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Gerar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="filters">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="filterMonth">Mês</label>
+                                    <select id="filterMonth">
+                                        <option value="all">Todos</option>
+                                        <option value="1">Janeiro</option>
+                                        <option value="2">Fevereiro</option>
+                                        <option value="3">Março</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Maio</option>
+                                        <option value="6">Junho</option>
+                                        <option value="7">Julho</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Setembro</option>
+                                        <option value="10">Outubro</option>
+                                        <option value="11">Novembro</option>
+                                        <option value="12">Dezembro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filterYear">Ano</label>
+                                    <select id="filterYear">
+                                        <!-- Years will be added here dynamically -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filterType">Tipo</label>
+                                    <select id="filterType">
+                                        <option value="all">Todos</option>
+                                        <option value="income">Receitas</option>
+                                        <option value="expense">Despesas</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filterCategory">Categoria</label>
+                                    <select id="filterCategory">
+                                        <option value="all">Todas</option>
+                                        <!-- Categories will be added here dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="transactionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Descrição</th>
+                                        <th>Categoria</th>
+                                        <th>Valor</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody">
+                                    <!-- Transactions will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div id="categories-section" class="content-section">
+                <h1>Categorias</h1>
+                
+                <!-- New Category Form -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Nova Categoria</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="categoryForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="categoryName">Nome</label>
+                                    <input type="text" id="categoryName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="categoryType">Tipo</label>
+                                    <select id="categoryType" required>
+                                        <option value="income">Receita</option>
+                                        <option value="expense">Despesa</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="categoryDescription">Descrição</label>
+                                <textarea id="categoryDescription"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Salvar</button>
+                                <button type="reset" class="btn btn-secondary">Limpar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Categories List -->
+                <div class="card mt-20">
+                    <div class="card-header">
+                        <h3>Todas as Categorias</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="categoriesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Descrição</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="categoriesBody">
+                                    <!-- Categories will be added here dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="content-section">
+                <h1>Relatórios</h1>
+                
+                <!-- Report Generator -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Gerar Relatório</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="reportForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="reportType">Tipo de Relatório</label>
+                                    <select id="reportType" required>
+                                        <option value="monthly">Mensal</option>
+                                        <option value="category">Por Categoria</option>
+                                        <option value="payment">Por Método de Pagamento</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportMonth">Mês</label>
+                                    <select id="reportMonth">
+                                        <option value="1">Janeiro</option>
+                                        <option value="2">Fevereiro</option>
+                                        <option value="3">Março</option>
+                                        <option value="4">Abril</option>
+                                        <option value="5">Maio</option>
+                                        <option value="6">Junho</option>
+                                        <option value="7">Julho</option>
+                                        <option value="8">Agosto</option>
+                                        <option value="9">Setembro</option>
+                                        <option value="10">Outubro</option>
+                                        <option value="11">Novembro</option>
+                                        <option value="12">Dezembro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="reportYear">Ano</label>
+                                    <select id="reportYear">
+                                        <!-- Years will be added here dynamically -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Gerar Relatório</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Report Result -->
+                <div id="reportResult" class="card mt-20" style="display: none;">
+                    <div class="card-header">
+                        <h3 id="reportTitle">Relatório</h3>
+                        <div class="card-actions">
+                            <button id="downloadReportBtn" class="btn btn-primary">
+                                <i class="fas fa-file-pdf"></i> Baixar PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="reportContent">
+                            <!-- Report content will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Transaction Modal -->
+    <div id="editTransactionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Transação</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editTransactionForm">
+                    <input type="hidden" id="editTransactionId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTransactionDate">Data</label>
+                            <input type="date" id="editTransactionDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTransactionType">Tipo</label>
+                            <select id="editTransactionType" required>
+                                <option value="income">Receita</option>
+                                <option value="expense">Despesa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTransactionDescription">Descrição</label>
+                            <input type="text" id="editTransactionDescription" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTransactionCategory">Categoria</label>
+                            <select id="editTransactionCategory" required>
+                                <!-- Categories will be added here dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editTransactionAmount">Valor (R$)</label>
+                            <input type="number" id="editTransactionAmount" step="0.01" min="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editTransactionPaymentMethod">Método de Pagamento</label>
+                            <select id="editTransactionPaymentMethod">
+                                <option value="money">Dinheiro</option>
+                                <option value="debit">Cartão de Débito</option>
+                                <option value="credit">Cartão de Crédito</option>
+                                <option value="transfer">Transferência</option>
+                                <option value="other">Outro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row edit-credit-card-details" style="display: none;">
+                        <div class="form-group">
+                            <label for="editCreditCardName">Cartão</label>
+                            <input type="text" id="editCreditCardName">
+                        </div>
+                        <div class="form-group">
+                            <label for="editInstallments">Parcelas</label>
+                            <input type="number" id="editInstallments" min="1" value="1">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTransactionNotes">Observações</label>
+                        <textarea id="editTransactionNotes"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" id="deleteTransactionBtn" class="btn btn-danger">Excluir</button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div id="editCategoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Categoria</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm">
+                    <input type="hidden" id="editCategoryId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editCategoryName">Nome</label>
+                            <input type="text" id="editCategoryName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editCategoryType">Tipo</label>
+                            <select id="editCategoryType" required>
+                                <option value="income">Receita</option>
+                                <option value="expense">Despesa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategoryDescription">Descrição</label>
+                        <textarea id="editCategoryDescription"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" id="deleteCategoryBtn" class="btn btn-danger">Excluir</button>
+                        <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/transactions.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="libs/jspdf.umd.min.js"></script>
+    <script src="js/pdf.js"></script>
+</body>
+</html>
